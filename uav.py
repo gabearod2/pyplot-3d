@@ -22,23 +22,23 @@ class Uav:
 
         self.ax = ax
 
-        self.b1 = np.array([0.1, 0.0, 0.0]).T
-        self.b2 = np.array([0.0, 0.1, 0.0]).T
-        self.b3 = np.array([0.0, 0.0, 0.1]).T
+        self.b1 = np.array([0.1, 0.0, 0.0]).T*10
+        self.b2 = np.array([0.0, 0.1, 0.0]).T*10
+        self.b3 = np.array([0.0, 0.0, 0.1]).T*10
 
-        self.fr = np.array([ 0.04, -0.04, 0.0]).T
-        self.bl = np.array([-0.04,  0.04, 0.0]).T
-        self.br = np.array([-0.04, -0.04, 0.0]).T
-        self.fl = np.array([ 0.04,  0.04, 0.0]).T
+        self.fr = np.array([ 0.04, -0.04, 0.0]).T*10
+        self.bl = np.array([-0.04,  0.04, 0.0]).T*10
+        self.br = np.array([-0.04, -0.04, 0.0]).T*10
+        self.fl = np.array([ 0.04,  0.04, 0.0]).T*10
 
         # Center of the quadrotor
-        self.body = Sphere(self.ax, 0.02, 'k')
+        self.body = Sphere(self.ax, 0.02*10, 'k')
 
         # Each motor shape
-        self.motor1 = Plate(self.ax, 0.02, 'k', resolution=50)
-        self.motor2 = Plate(self.ax, 0.02, 'k', resolution=50)
-        self.motor3 = Plate(self.ax, 0.02, 'k', resolution=50)
-        self.motor4 = Plate(self.ax, 0.02, 'k', resolution=50)
+        self.motor1 = Plate(self.ax, 0.02*10, 'k', resolution=50)
+        self.motor2 = Plate(self.ax, 0.02*10, 'k', resolution=50)
+        self.motor3 = Plate(self.ax, 0.02*10, 'k', resolution=50)
+        self.motor4 = Plate(self.ax, 0.02*10, 'k', resolution=50)
 
         # Arrows for the each body axis
         self.arrow_b1 = Arrow(ax, self.b1, 'r')
@@ -46,10 +46,10 @@ class Uav:
         self.arrow_b3 = Arrow(ax, self.b3, 'b')
 
         # Quadrotor arms
-        self.arm_fr = Line(ax, 'y')
-        self.arm_bl = Line(ax, 'y')
-        self.arm_br = Line(ax, 'y')
-        self.arm_fl = Line(ax, 'y')
+        self.arm_fr = Line(ax, 'k')
+        self.arm_bl = Line(ax, 'k')
+        self.arm_br = Line(ax, 'k')
+        self.arm_fl = Line(ax, 'k')
     
 
     def draw_at(self, x=np.array([0.0, 0.0, 0.0]).T, R=np.eye(3)):
@@ -67,7 +67,7 @@ class Uav:
         '''
 
         # First, clear the axis of all the previous plots
-        self.ax.clear()
+        # self.ax.clear()
 
         # Center of the quadrotor
         self.body.draw_at(x)
