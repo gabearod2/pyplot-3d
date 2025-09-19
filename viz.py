@@ -31,7 +31,7 @@ class QuadrotorAnimator():
         self.ax.set_ylim([self.ymin, self.ymax])
         self.ax.set_zlim([self.zmin, self.zmax])
 
-        self.goal_x = np.asarray(goal_x)
+        self.goal_x = np.asarray(goal_x[0, :])
         self.goal_R = np.asarray(goal_R)
 
     def animate_trajectories(
@@ -42,19 +42,22 @@ class QuadrotorAnimator():
         assert traj.reward.ndim == 2
         num_trajs = traj.reward.shape[0]
         state: EnvState = traj.state
-        done = np.logical_or(traj.terminated, traj.truncated)
-        idx = np.where(done[0])[0][0].item() + 1
 
         uavs = [Uav(self.ax) for _ in range(num_trajs)]
         goal_uav = Uav(self.ax, color='c')
 
-        x = np.zeros((num_trajs, idx, 3)) # (20, 501, 3) traj, idx, pos
-        R = np.zeros((num_trajs, idx, 3, 3)) # (20, 501, 3, 3) traj, idx, R
-
+        idxs = np.zeros(num_trajs)
         for i in range(num_trajs):
-            idx = np.where(done[i])[0][0].item() + 1
-            x[i, :idx, :] = state.quadrotor_state.p[i, :idx, 0:3] 
-            R[i, :idx, :] = state.quadrotor_state.R[i, :idx]
+            done = np.logical_or(traj.terminated, traj.truncated)
+            idxs[i] = np.where(done[i])[0][0].item() + 1
+
+        x = np.zeros((num_trajs, np.int32(np.max(idxs)), 3)) # (20, 501, 3) traj, idx, pos
+        R = np.zeros((num_trajs, np.int32(np.max(idxs)), 3, 3)) # (20, 501, 3, 3) traj, idx, R
+
+        for j in range(num_trajs):
+            idx = np.int32(idxs[j])
+            x[j, :idx, :] = state.quadrotor_state.p[j, :idx, 0:3] 
+            R[j, :idx, :] = state.quadrotor_state.R[j, :idx]
 
         interval = (state.time[0, 1] - state.time[0, 0])*1000 
 
@@ -68,6 +71,7 @@ class QuadrotorAnimator():
         manager = plt.get_current_fig_manager()
         manager.full_screen_toggle()
         plt.title("Quadrotor Animation (Press 'Q' to Exit)")
+        # TODO: Be able to save in mp4
         if filename is not None: 
             from matplotlib.animation import PillowWriter
             fps = max(1, int(round(1000.0 / float(interval))))  # interval in ms
