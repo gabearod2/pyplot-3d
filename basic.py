@@ -28,46 +28,64 @@ class Arrow:
                                 [x[2], tip[2]])
 
 
-class Sphere:
-    """Center marker for the UAV (fast point instead of heavy surface)."""
-    def __init__(self, ax, r, c='k'):
+class Dot3D:
+    """A tiny filled disc in data units (replaces the DPI-scaled marker 'Sphere')."""
+    def __init__(self, ax, r=0.01, c='k', resolution=40):
         self.ax = ax
-        # Use a marker; markersize is in points, scale empirically vs r
-        (self.artist,) = ax.plot([], [], [], marker='o', color=c,
-                                 markersize=max(1, int(200 * r)))
+        self.r = r
+        self.color = c
+        theta = np.linspace(0.0, 2*np.pi, resolution, endpoint=True)
+        # disc in the XY-plane, small radius r
+        self.circle_local = np.vstack([r*np.cos(theta), r*np.sin(theta), np.zeros_like(theta)])
+        self.coll = Poly3DCollection([[(0.0, 0.0, 0.0)]],
+                                     facecolor=c, edgecolor='none', alpha=1.0)
+        # Safer sorting for visibility
+        if hasattr(self.coll, "set_zsort"):
+            self.coll.set_zsort('average')
+        self.ax.add_collection3d(self.coll)
 
-    def draw_at(self, position):
-        self.artist.set_data_3d([float(position[0])],
-                                [float(position[1])],
-                                [float(position[2])])
+    def draw_at(self, x):
+        x = np.asarray(x).reshape(3, )
+        pts = self.circle_local + x[:, None]
+        verts = [tuple(p) for p in pts.T]
+        try:
+            self.coll.set_verts([verts], closed=True)
+        except TypeError:
+            self.coll.set_verts([verts])
 
 
 class Plate:
-    """
-    Filled rotor disc using Poly3DCollection.
-    Create once; update vertices each frame by rotating/translating a cached circle.
-    """
-    def __init__(self, ax, r, c='k', x=np.array([0, 0, 0.0]), R=np.eye(3), resolution=60, alpha=0.9):
+    def __init__(self, ax, r, c='k', x=np.array([0,0,0.0]), R=np.eye(3),
+                 resolution=60, alpha=1.0):
         self.ax = ax
         self.r = r
         self.color = c
         self.alpha = alpha
 
         theta = np.linspace(0.0, 2*np.pi, resolution, endpoint=True)
-        self.circle_local = np.vstack([r*np.cos(theta), r*np.sin(theta), np.zeros_like(theta)])  # (3,M)
+        self.circle_local = np.vstack([r*np.cos(theta), r*np.sin(theta), np.zeros_like(theta)])
 
-        # Create a placeholder polygon and add to axes
         self.collection = Poly3DCollection([[(0.0, 0.0, 0.0)]],
                                            facecolor=self.color,
-                                           edgecolor=self.color,
-                                           linewidth=0.6,
+                                           edgecolor='none',   # was self.color
+                                           linewidth=0.0,
                                            alpha=self.alpha)
-        ax.add_collection3d(self.collection)
+        if hasattr(self.collection, "set_zsort"):
+            self.collection.set_zsort('average')
 
-        # Initialize at provided pose if desired
+        ax.add_collection3d(self.collection)
         self.draw_at(x, R)
 
+    def set_alpha(self, a: float):
+        fc = self.collection.get_facecolor()
+        if len(fc):
+            r,g,b,_ = fc[0]
+            self.collection.set_facecolor([(r, g, b, a)])
+
     def draw_at(self, x, R):
-        pts = (R @ self.circle_local) + x[:, None]  # (3, M)
-        verts = [tuple(p) for p in pts.T]           # list of (x,y,z)
-        self.collection.set_verts([verts])
+        pts = (R @ self.circle_local) + x[:, None]
+        verts = [tuple(p) for p in pts.T]
+        try:
+            self.collection.set_verts([verts], closed=True)
+        except TypeError:
+            self.collection.set_verts([verts])

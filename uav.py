@@ -1,5 +1,5 @@
 import numpy as np
-from .basic import Sphere, Line, Arrow, Plate
+from .basic import Dot3D, Line, Arrow, Plate
 
 class Uav:
     """
@@ -11,23 +11,23 @@ class Uav:
         self.ax = ax
 
         # Body axes (scaled for visibility; keep your previous scaling x10)
-        self.b1 = np.array([0.1, 0.0, 0.0])*2
-        self.b2 = np.array([0.0, 0.1, 0.0])*2
-        self.b3 = np.array([0.0, 0.0, 0.1])*2
+        self.b1 = np.array([0.1, 0.0, 0.0])*3
+        self.b2 = np.array([0.0, 0.1, 0.0])*3
+        self.b3 = np.array([0.0, 0.0, 0.1])*3
 
         # Motor offsets in body frame (FR, BL, BR, FL), scaled x10 to match your code
-        self.fr = np.array([ 0.04, -0.04, 0.0])*2 
-        self.bl = np.array([-0.04,  0.04, 0.0])*2 
-        self.br = np.array([-0.04, -0.04, 0.0])*2 
-        self.fl = np.array([ 0.04,  0.04, 0.0])*2 
+        self.fr = np.array([ 0.04, -0.04, 0.0])*4 
+        self.bl = np.array([-0.04,  0.04, 0.0])*4 
+        self.br = np.array([-0.04, -0.04, 0.0])*4 
+        self.fl = np.array([ 0.04,  0.04, 0.0])*4 
 
-        # Artists (created once)
-        self.body = Sphere(self.ax, r=0.02*2, c=color)
+        # Artists 
+        self.body = Plate(self.ax, r=0.05, c=color)
 
-        self.motor1 = Plate(self.ax, r=0.02*2, c=color, resolution=50, alpha=0.85)
-        self.motor2 = Plate(self.ax, r=0.02*2, c=color, resolution=50, alpha=0.85)
-        self.motor3 = Plate(self.ax, r=0.02*2, c=color, resolution=50, alpha=0.85)
-        self.motor4 = Plate(self.ax, r=0.02*2, c=color, resolution=50, alpha=0.85)
+        self.motor1 = Plate(self.ax, r=0.1, c=color)
+        self.motor2 = Plate(self.ax, r=0.1, c=color)
+        self.motor3 = Plate(self.ax, r=0.1, c=color)
+        self.motor4 = Plate(self.ax, r=0.1, c=color)
 
         self.arrow_b1 = Arrow(self.ax, c='r')
         self.arrow_b2 = Arrow(self.ax, c='g')
@@ -43,7 +43,7 @@ class Uav:
         R = np.asarray(R).reshape(3, 3)
 
         # center marker
-        self.body.draw_at(x)
+        self.body.draw_at(x, R)
 
         # rotor plates
         self.motor1.draw_at(x + R @ self.fr, R)
