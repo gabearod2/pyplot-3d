@@ -49,7 +49,7 @@ class QuadrotorAnimator():
         except Exception:
             pass
 
-        # Make aspect ratio match the world box
+        # aspect ratio = world box
         try:
             self.ax.set_box_aspect((self.xmax-self.xmin,
                                     self.ymax-self.ymin,
@@ -57,16 +57,16 @@ class QuadrotorAnimator():
         except Exception:
             pass
 
-        # Minimalist 3D panes
+        # panes
         self.ax.grid(False)
         for axis in [self.ax.xaxis, self.ax.yaxis, self.ax.zaxis]:
             try:
-                axis.pane.set_facecolor((1,1,1,0))   # transparent panes
+                axis.pane.set_facecolor((1,1,1,0))  
                 axis.pane.set_edgecolor((0,0,0,0.2))
             except Exception:
                 pass
 
-        self.goal_x = np.asarray(goal_x[0, :])
+        self.goal_x = np.asarray(goal_x)
         self.goal_R = np.asarray(goal_R)
 
     def animate_trajectories(
