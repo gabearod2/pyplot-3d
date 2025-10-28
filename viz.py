@@ -125,14 +125,6 @@ class QuadrotorAnimator():
             blit=False  # blitting is not supported for 3D artists
         )
 
-        # Avoid fullscreen changes during export
-        try:
-            if not filename:
-                manager = plt.get_current_fig_manager()
-                manager.full_screen_toggle()
-        except Exception:
-            pass
-
         # Save if a filename is provided. Choose writer by extension.
         if filename:
             # Neutral style for export, then re-apply typography so fonts match
@@ -159,8 +151,10 @@ class QuadrotorAnimator():
             self.fig.text(0.01, 0.01, "AcroRL", fontsize=9, alpha=0.6)
 
             ani.save(str(path), writer=writer, dpi=dpi)
-
-        plt.show()
+            print("[PyPlot3D] Animation saved.")
+            plt.close(self.fig)
+        
+        # plt.show()
 
     def update_plot(self, i, x, R, uavs, goal_uav):
         for k, uav in enumerate(uavs):
